@@ -10,7 +10,7 @@
         <h2><%=(entry.title)%></h2>
         <!-- You can add class:text as well, if you want -->
         <% const val=entry.title%>
-        <p class="text"><%=(entry.body).substr(0,100)+"..."%><a href="/posts/<%=(entry.title)%>">Read More</a></p>
+        <p class="text"><%=(entry.content).substr(0,100)+"..."%><a href="/posts/<%=(entry._id)%>">Read More</a></p>
        </div>
        
    <%})%>

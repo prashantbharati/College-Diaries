@@ -2,6 +2,7 @@
 
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose=require("mongoose");
 const ejs = require("ejs");
 const { includes } = require("lodash");
 const _ = require('lodash');
@@ -20,9 +21,33 @@ app.use(express.static("public"));
 
 let posts=[];
 
+/*---------------------Adding database------------------------------------------*/
+
+mongoose.connect("mongodb://localhost:27017/blogDB", {useNewUrlParser:true});
+
+const postschema={
+  title:String,
+  content:String
+};
+
+const Post=mongoose.model("Post",postschema);
+
+/*-------------------------------------------------------------------------------*/
+
 
 app.get("/",function(req,res){
-  res.render("home",{ newblog:posts });
+
+  Post.find({},function(err,founditems){
+    if(!err){
+      res.render("home",{ newblog:founditems });
+
+    } else{
+      console.log(err);
+    }
+   
+  });
+
+  
  
 })
 
@@ -40,28 +65,44 @@ res.render("compose")
 })
 
 app.post("/",function(req,res){
-  var post={
-   title:req.body.posttitle,
-   body:req.body.postbody
-  };
-  posts.push(post);
+  // var post={
+  //  title:req.body.posttitle,
+  //  body:req.body.postbody
+  // };
+
+  const post=new Post({
+    title:req.body.posttitle,
+    content:req.body.postbody
+  });
+
+  post.save();
+  // posts.push(post);
 
   res.redirect("/")
 })
 
-app.get("/posts/:postName",function(req,res){
+app.get("/posts/:postid",function(req,res){
  
-  const vcheck=_.lowerCase(req.params.postName);
- 
-  posts.forEach(function(post){
+   const vcheck=(req.params.postid);
+
+  // posts.forEach(function(post){
     
-    const stored=_.lowerCase(post.title);
+  //   const stored=_.lowerCase(post.title);
     
-    if(stored===vcheck){
-      console.log("Match Found");
-      res.render("post",{pblog:post});
-    }
-  });
+  //   if(stored===vcheck){
+  //     console.log("Match Found");
+  //     res.render("post",{pblog:post});
+  //   }
+  // });
+
+   Post.findOne({_id:vcheck},function(err,foundPost){
+     if(!err){
+      res.render("post",{ pblog:foundPost });
+     } else{
+       console.log(err)
+     }
+   });
+
 
 });
 
